@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Comparativo</title> 
+    <style> 
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f4f6f9; 
+            margin: 0; 
+            padding: 20px; 
+        } 
+ 
+        .header { 
+            background: linear-gradient(135deg, #111827, #1f2937); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+        } 
+ 
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+        } 
+ 
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        } 
+ 
+        th, td { 
+            border: 1px solid #d1d5db; 
+            padding: 10px; 
+        } 
+ 
+        th { 
+            background: #e5e7eb; 
+        } 
+    </style> 
+</head> 
+<body> 
+ 
+<div class="header"> 
+    <h1>Dashboard comparativo</h1> 
+    <a href="{% url 'inicio' %}" style="color:white;">Volver al dashboard</a> 
+</div> 
+ 
+<div class="card"> 
+    <h2>Comparativo por categoría</h2> 
+    <table> 
+        <tr> 
+            <th>Categoría</th> 
+            <th>Total</th> 
+        </tr> 
+        {% for item in comparativo_categorias %} 
+        <tr> 
+            <td>{{ item.producto__categoria__nombre }}</td> 
+            <td>{{ item.total }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</div> 
+ 
+<div class="card"> 
+    <h2>Comparativo por ciudad</h2> 
+    <table> 
+        <tr> 
+            <th>Ciudad</th> 
+            <th>Total</th> 
+        </tr> 
+        {% for item in comparativo_ciudades %} 
+        <tr> 
+            <td>{{ item.sucursal__ciudad }}</td> 
+            <td>{{ item.total }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</div> 
+ 
+<div class="card"> 
+    <h2>Comparativo por método de pago</h2> 
+    <table> 
+        <tr> 
+            <th>Método</th> 
+            <th>Total</th> 
+        </tr> 
+        {% for item in comparativo_metodos %} 
+        <tr> 
+            <td>{{ item.metodo_pago__nombre }}</td> 
+            <td>{{ item.total }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</div> 
+ 
+</body> 
+</html>

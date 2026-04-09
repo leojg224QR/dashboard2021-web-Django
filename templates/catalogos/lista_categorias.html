@@ -1,0 +1,22 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Categorías</title> 
+</head> 
+<body> 
+    <h1>Listado de categorías</h1> 
+    <table border="1"> 
+        <tr> 
+            <th>ID</th> 
+            <th>Nombre</th> 
+        </tr> 
+        {% for categoria in categorias %} 
+        <tr> 
+            <td>{{ categoria.id }}</td> 
+            <td>{{ categoria.nombre }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html> 

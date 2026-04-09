@@ -1,0 +1,28 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Sucursales</title> 
+</head> 
+<body> 
+    <h1>Listado de sucursales</h1> 
+    <table border="1"> 
+        <tr> 
+            <th>ID</th> 
+            <th>Nombre</th> 
+            <th>Ciudad</th> 
+            <th>Estado</th> 
+            <th>País</th> 
+        </tr> 
+        {% for sucursal in sucursales %} 
+        <tr> 
+            <td>{{ sucursal.id }}</td> 
+            <td>{{ sucursal.nombre }}</td> 
+            <td>{{ sucursal.ciudad }}</td> 
+            <td>{{ sucursal.estado }}</td> 
+            <td>{{ sucursal.pais }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html>

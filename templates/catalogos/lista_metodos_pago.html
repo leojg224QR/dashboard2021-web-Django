@@ -1,0 +1,22 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Métodos de pago</title> 
+</head> 
+<body> 
+    <h1>Listado de métodos de pago</h1> 
+    <table border="1"> 
+        <tr> 
+            <th>ID</th> 
+            <th>Nombre</th> 
+        </tr> 
+        {% for metodo in metodos %} 
+        <tr> 
+            <td>{{ metodo.id }}</td> 
+            <td>{{ metodo.nombre }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Clientes</title> 
+</head> 
+<body> 
+    <h1>Listado de clientes</h1> 
+    <table border="1"> 
+        <tr> 
+            <th>ID</th> 
+            <th>Nombre</th> 
+        </tr> 
+        {% for cliente in clientes %} 
+        <tr> 
+            <td>{{ cliente.id }}</td> 
+            <td>{{ cliente.nombre }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html>

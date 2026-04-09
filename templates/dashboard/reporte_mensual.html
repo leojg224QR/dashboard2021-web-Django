@@ -1,0 +1,26 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Reporte Mensual</title> 
+</head> 
+<body> 
+    <h1>Reporte mensual de ventas</h1> 
+    <a href="{% url 'inicio' %}">Volver al dashboard</a> 
+ 
+    <table border="1"> 
+        <tr> 
+            <th>Mes</th> 
+            <th>Total ventas</th> 
+            <th>Total documentos</th> 
+        </tr> 
+        {% for item in datos %} 
+        <tr> 
+            <td>{{ item.mes|date:"F Y" }}</td> 
+            <td>{{ item.total_ventas }}</td> 
+            <td>{{ item.total_documentos }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html>

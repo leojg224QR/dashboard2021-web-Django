@@ -1,0 +1,284 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Dashboard Ejecutivo</title> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <style> 
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background: #f4f6f9; 
+            color: #1f2937; 
+        } 
+ 
+        header { 
+            background: #1f2937; 
+            color: white; 
+            padding: 20px; 
+        } 
+ 
+        .contenedor { 
+            width: 95%; 
+            margin: 20px auto; 
+        } 
+ 
+        .card { 
+            background: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+        } 
+ 
+        .grid-kpis { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 15px; 
+        } 
+ 
+        .kpi { 
+            background: #ffffff; 
+            border-left: 6px solid #374151; 
+            border-radius: 10px; 
+            padding: 15px; 
+        } 
+ 
+        .kpi h3 { 
+            margin: 0 0 10px 0; 
+            font-size: 16px; 
+        } 
+ 
+        .kpi p { 
+            margin: 0; 
+            font-size: 24px; 
+            font-weight: bold; 
+        } 
+ 
+        .grid-graficas { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); 
+            gap: 20px; 
+        } 
+ 
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white; 
+        } 
+ 
+        table th, table td { 
+            border: 1px solid #d1d5db; 
+            padding: 10px; 
+            text-align: left; 
+        } 
+ 
+        table th { 
+            background: #e5e7eb; 
+        } 
+ 
+        form .fila { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 15px; 
+            align-items: end; 
+        } 
+ 
+        input, select, button, a.boton { 
+            padding: 10px; 
+            border-radius: 6px; 
+            border: 1px solid #cbd5e1; 
+            text-decoration: none; 
+        } 
+ 
+        button, a.boton { 
+            background: #1f2937; 
+            color: white; 
+            cursor: pointer; 
+            display: inline-block; 
+            text-align: center; 
+        } 
+ 
+        .acciones { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        } 
+ 
+        canvas { 
+            background: white; 
+            padding: 10px; 
+            border-radius: 10px; 
+        } 
+    </style> 
+</head> 
+<body> 
+ 
+<header> 
+    <h1>Dashboard Ejecutivo de Ventas</h1> 
+    <p>Visualización general del desempeño comercial</p> 
+</header> 
+ 
+<div class="contenedor"> 
+ 
+    <section class="card"> 
+        <h2>Filtros</h2> 
+        <form method="get"> 
+            <div class="fila"> 
+                <div> 
+                    <label>Fecha inicio</label> 
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}"> 
+                </div> 
+                <div> 
+                    <label>Fecha fin</label> 
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin }}"> 
+                </div> 
+                <div> 
+                    <label>Cliente</label> 
+                    <select name="cliente"> 
+                        <option value="">Todos</option> 
+                        {% for cliente in clientes %} 
+                            <option value="{{ cliente.id }}" {% if cliente_id == cliente.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cliente.nombre }}
+                            </option>
+                        {% endfor %} 
+                    </select> 
+                </div> 
+                <div> 
+                    <label>Vendedor</label> 
+                    <select name="vendedor"> 
+                        <option value="">Todos</option> 
+                        {% for vendedor in vendedores %} 
+                            <option value="{{ vendedor.id }}" {% if vendedor_id == vendedor.id|stringformat:"s" %}selected{% endif %}>
+                                {{ vendedor.nombre }}
+                            </option>
+                                {{ vendedor.nombre }} 
+                            </option> 
+                        {% endfor %} 
+                    </select> 
+                </div> 
+                <div> 
+                    <button type="submit">Aplicar filtros</button> 
+                </div> 
+            </div> 
+        </form> 
+    </section> 
+ 
+    <section class="card"> 
+        <h2>Indicadores principales</h2> 
+        <div class="grid-kpis"> 
+            <div class="kpi"> 
+                <h3>Total ventas</h3> 
+                <p>${{ total_ventas }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3>Total documentos</h3> 
+                <p>{{ total_documentos }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3>Ticket promedio</h3> 
+                <p>${{ ticket_promedio }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3>Venta máxima</h3> 
+                <p>${{ venta_maxima }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3>Productos vendidos</h3> 
+                <p>{{ total_productos_vendidos }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3>Métodos usados</h3> 
+                <p>{{ metodos_usados }}</p> 
+            </div> 
+        </div> 
+    </section> 
+ 
+    <section class="card"> 
+        <h2>Acciones</h2> 
+        <div class="acciones"> 
+            <a class="boton" href="{% url 'lista_ventas' %}">Ver ventas</a> 
+            <a class="boton" href="{% url 'reporte_mensual' %}">Reporte mensual</a> 
+            <a class="boton" href="{% url 'dashboard_comparativo' %}">Comparativo</a> 
+            <a class="boton" href="{% url 'exportar_ventas_excel' %}">Exportar 
+Excel</a> 
+        </div> 
+    </section> 
+ 
+    <section class="grid-graficas"> 
+        <div class="card"> 
+            <h2>Ventas por método de pago</h2> 
+            <canvas id="graficaMetodo"></canvas> 
+        </div> 
+ 
+        <div class="card"> 
+            <h2>Ventas por vendedor</h2> 
+            <canvas id="graficaVendedor"></canvas> 
+        </div> 
+ 
+        <div class="card"> 
+            <h2>Productos más vendidos</h2> 
+            <canvas id="graficaProductos"></canvas> 
+        </div> 
+ 
+        <div class="card"> 
+            <h2>Ventas por categoría</h2> 
+            <canvas id="graficaCategoria"></canvas> 
+        </div> 
+    </section> 
+ 
+</div> 
+ 
+<script> 
+    const ventasPorMetodo = JSON.parse('{{ ventas_por_metodo_json|escapejs }}'); 
+    const ventasPorVendedor = JSON.parse('{{ ventas_por_vendedor_json|escapejs }}'); 
+    const productosMasVendidos = JSON.parse('{{ productos_mas_vendidos_json|escapejs }}'); 
+    const ventasPorCategoria = JSON.parse('{{ ventas_por_categoria_json|escapejs }}'); 
+ 
+    new Chart(document.getElementById('graficaMetodo'), { 
+        type: 'bar', 
+        data: { 
+            labels: ventasPorMetodo.map(x => x.metodo_pago__nombre), 
+            datasets: [{ 
+                label: 'Total', 
+                data: ventasPorMetodo.map(x => x.total) 
+            }] 
+        } 
+    }); 
+ 
+    new Chart(document.getElementById('graficaVendedor'), { 
+        type: 'bar', 
+        data: { 
+            labels: ventasPorVendedor.map(x => x.vendedor__nombre), 
+            datasets: [{ 
+                label: 'Total', 
+                data: ventasPorVendedor.map(x => x.total) 
+            }] 
+        } 
+    }); 
+ 
+    new Chart(document.getElementById('graficaProductos'), { 
+        type: 'bar', 
+        data: { 
+            labels: productosMasVendidos.map(x => x.producto__nombre), 
+            datasets: [{ 
+                label: 'Cantidad', 
+                data: productosMasVendidos.map(x => x.total_cantidad) 
+            }] 
+        } 
+    }); 
+ 
+    new Chart(document.getElementById('graficaCategoria'), { 
+        type: 'pie', 
+        data: { 
+            labels: ventasPorCategoria.map(x => x.producto__categoria__nombre), 
+            datasets: [{ 
+                label: 'Importe', 
+                data: ventasPorCategoria.map(x => x.total_importe) 
+            }] 
+        } 
+    }); 
+</script> 
+ 
+</body> 
+</html> 

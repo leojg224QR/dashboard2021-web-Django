@@ -1,0 +1,69 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Listado de Ventas</title> 
+    <style> 
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f4f6f9; 
+            margin: 0; 
+            padding: 20px; 
+        } 
+ 
+        .card { 
+            background: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+        } 
+ 
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        } 
+ 
+        th, td { 
+            border: 1px solid #d1d5db; 
+            padding: 10px; 
+        } 
+ 
+        th { 
+            background: #e5e7eb; 
+        } 
+ 
+        a { 
+            text-decoration: none; 
+        } 
+    </style> 
+</head> 
+<body> 
+    <div class="card"> 
+        <h1>Listado de ventas</h1> 
+        <p><a href="{% url 'inicio' %}">Volver al dashboard</a></p> 
+ 
+        <table> 
+            <tr> 
+                <th>Folio</th> 
+                <th>Fecha</th> 
+                <th>Cliente</th> 
+                <th>Sucursal</th> 
+                <th>Vendedor</th> 
+                <th>Método de pago</th> 
+                <th>Total</th> 
+            </tr> 
+            {% for venta in ventas %} 
+            <tr> 
+                <td>{{ venta.folio }}</td> 
+                <td>{{ venta.fecha }}</td> 
+                <td>{{ venta.cliente.nombre }}</td> 
+                <td>{{ venta.sucursal.nombre }}</td> 
+                <td>{{ venta.vendedor.nombre }}</td> 
+                <td>{{ venta.metodo_pago.nombre }}</td> 
+                <td>{{ venta.total }}</td> 
+            </tr> 
+            {% endfor %} 
+        </table> 
+    </div> 
+</body> 
+</html>

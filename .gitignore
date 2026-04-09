@@ -1,0 +1,28 @@
+# Entorno virtual
+venv/
+env/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Base de datos SQLite (se regenera con migraciones)
+db.sqlite3
+
+# Configuración de VS Code
+.vscode/
+
+# Archivos de sistema
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Media (archivos subidos por usuarios)
+media/
+
+# Variables de entorno sensibles
+.env

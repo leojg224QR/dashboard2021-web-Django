@@ -1,0 +1,24 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Vendedores</title> 
+</head> 
+<body> 
+    <h1>Listado de vendedores</h1> 
+    <table border="1"> 
+        <tr> 
+            <th>ID</th> 
+            <th>Nombre</th> 
+            <th>Sucursal</th> 
+        </tr> 
+        {% for vendedor in vendedores %} 
+        <tr> 
+            <td>{{ vendedor.id }}</td> 
+            <td>{{ vendedor.nombre }}</td> 
+            <td>{{ vendedor.sucursal.nombre }}</td> 
+        </tr> 
+        {% endfor %} 
+    </table> 
+</body> 
+</html>
