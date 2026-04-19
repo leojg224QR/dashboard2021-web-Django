@@ -1,8 +1,10 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
+{% load humanize %} 
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
     <title>Dashboard Ejecutivo</title> 
+    <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
     <style> 
         body { 
@@ -125,6 +127,14 @@
         <h2>Filtros</h2> 
         <form method="get"> 
             <div class="fila"> 
+                <div>
+                    <label>Moneda</label>
+                    <select id="selector-moneda" onchange="convertirMonedas()">
+                        <option value="MXN" selected>Pesos (MXN)</option>
+                        <option value="USD">Dolares (USD)</option>
+                        <option value="EUR">Euros (EUR)</option>
+                    </select>
+                </div>
                 <div> 
                     <label>Fecha inicio</label> 
                     <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}"> 
@@ -169,27 +179,27 @@
         <div class="grid-kpis"> 
             <div class="kpi"> 
                 <h3>Total ventas</h3> 
-                <p>${{ total_ventas }}</p> 
+                <p id="valor-total">${{ total_ventas|floatformat:2 }}</p>
             </div> 
             <div class="kpi"> 
                 <h3>Total documentos</h3> 
-                <p>{{ total_documentos }}</p> 
+                <p id="valor-documentos">{{ total_documentos }}</p> 
             </div> 
             <div class="kpi"> 
                 <h3>Ticket promedio</h3> 
-                <p>${{ ticket_promedio }}</p> 
-            </div> 
+                <p id="valor-ticket">${{ ticket_promedio|floatformat:2 }}</p> 
+            </div>  
             <div class="kpi"> 
                 <h3>Venta máxima</h3> 
-                <p>${{ venta_maxima }}</p> 
+                <p id="valor-maxima">${{ venta_maxima|floatformat:2 }}</p> 
             </div> 
             <div class="kpi"> 
                 <h3>Productos vendidos</h3> 
-                <p>{{ total_productos_vendidos }}</p> 
+                <p id="valor-productos">{{ total_productos_vendidos }}</p> 
             </div> 
             <div class="kpi"> 
                 <h3>Métodos usados</h3> 
-                <p>{{ metodos_usados }}</p> 
+                <p id="valor-metodos">{{ metodos_usados }}</p> 
             </div> 
         </div> 
     </section> 
@@ -230,10 +240,153 @@ Excel</a>
 </div> 
  
 <script> 
+// 1. Tasas de cambio
+    const tasas = {
+        MXN: 1,
+        USD: 0.059,
+        EUR: 0.049
+    };
+
+    // 2. Valores limpios para los KPIs
+    const totalOriginal = parseFloat("{{ total_ventas|stringformat:'.2f' }}");
+    const ticketOriginal = parseFloat("{{ ticket_promedio|stringformat:'.2f' }}");
+    const maximaOriginal = parseFloat("{{ venta_maxima|stringformat:'.2f' }}");
+
+    const documentosOriginal = parseInt("{{ total_documentos }}");
+    const productosOriginal = parseInt("{{ total_productos_vendidos }}");
+    const metodosOriginal = parseInt("{{ metodos_usados }}");
+
+    // 3. Función de formato profesional (es-MX para comas en miles)
+    function formatear(valor, esMoneda = true){
+        let numeroFormateado = valor.toLocaleString('es-MX', {
+            minimumFractionDigits: esMoneda ? 2 : 0, 
+            maximumFractionDigits: esMoneda ? 2 : 0
+        });
+        return esMoneda ? `$ ${numeroFormateado}` : numeroFormateado;
+    }
+
+    // --- SECCIÓN DE GRÁFICAS ---
+    // Datos originales de Django
     const ventasPorMetodo = JSON.parse('{{ ventas_por_metodo_json|escapejs }}'); 
     const ventasPorVendedor = JSON.parse('{{ ventas_por_vendedor_json|escapejs }}'); 
     const productosMasVendidos = JSON.parse('{{ productos_mas_vendidos_json|escapejs }}'); 
     const ventasPorCategoria = JSON.parse('{{ ventas_por_categoria_json|escapejs }}'); 
+
+    // Variables globales para las gráficas
+    let chartMetodo, chartVendedor, chartProductos, chartCategoria;
+
+    // 4. Función para dibujar las gráficas
+    function renderizarGraficas(tasa) {
+        
+        // EL TRUCO DEFINITIVO: Busca gráficas "fantasmas" directamente en los lienzos y las destruye
+        const idsGraficas = ['graficaMetodo', 'graficaVendedor', 'graficaProductos', 'graficaCategoria'];
+        idsGraficas.forEach(id => {
+            let graficaExistente = Chart.getChart(id); // Le pregunta directo a Chart.js
+            if (graficaExistente) {
+                graficaExistente.destroy();
+            }
+        });
+
+        const configComun = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatear(context.parsed.y || context.parsed, true);
+                        }
+                    }
+                }
+            }
+        };
+
+        // Redibujamos desde cero
+        new Chart(document.getElementById('graficaMetodo'), { 
+            type: 'bar', 
+            data: { 
+                labels: ventasPorMetodo.map(x => x.metodo_pago__nombre), 
+                datasets: [{ 
+                    label: 'Total', 
+                    data: ventasPorMetodo.map(x => x.total * tasa),
+                    backgroundColor: '#3b82f6'
+                }] 
+            },
+            options: configComun
+        }); 
+
+        new Chart(document.getElementById('graficaVendedor'), { 
+            type: 'bar', 
+            data: { 
+                labels: ventasPorVendedor.map(x => x.vendedor__nombre), 
+                datasets: [{ 
+                    label: 'Total', 
+                    data: ventasPorVendedor.map(x => x.total * tasa),
+                    backgroundColor: '#10b981'
+                }] 
+            },
+            options: configComun
+        }); 
+
+        new Chart(document.getElementById('graficaProductos'), { 
+            type: 'bar', 
+            data: { 
+                labels: productosMasVendidos.map(x => x.producto__nombre), 
+                datasets: [{ 
+                    label: 'Cantidad', 
+                    data: productosMasVendidos.map(x => x.total_cantidad),
+                    backgroundColor: '#f59e0b'
+                }] 
+            } 
+        }); 
+
+        new Chart(document.getElementById('graficaCategoria'), { 
+            type: 'pie', 
+            data: { 
+                labels: ventasPorCategoria.map(x => x.producto__categoria__nombre), 
+                datasets: [{ 
+                    label: 'Importe',
+                    data: ventasPorCategoria.map(x => x.total_importe * tasa),
+                    backgroundColor: ['#6366f1', '#ec4899', '#8b5cf6', '#06b6d4',]
+                }] 
+            },
+            options: configComun
+        }); 
+    }
+
+    // 5. Función principal de conversión
+    function convertirMonedas(){
+        const selector = document.getElementById('selector-moneda');
+        if (!selector) return; 
+        
+        const monedaSeleccionada = selector.value;
+        const tasa = tasas[monedaSeleccionada]; 
+        
+        const elTotal = document.getElementById('valor-total');
+        const elTicket = document.getElementById('valor-ticket');
+        const elMaxima = document.getElementById('valor-maxima');
+        const elDocs = document.getElementById('valor-documentos');
+        const elProds = document.getElementById('valor-productos');
+        const elMets = document.getElementById('valor-metodos');
+
+        if(elTotal && elTicket && elMaxima && elDocs && elProds && elMets) {
+            elTotal.innerText = formatear(totalOriginal * tasa, true);
+            elTicket.innerText = formatear(ticketOriginal * tasa, true);
+            elMaxima.innerText = formatear(maximaOriginal * tasa, true);
+            
+            elDocs.innerText = formatear(documentosOriginal, false);
+            elProds.innerText = formatear(productosOriginal, false);
+            elMets.innerText = formatear(metodosOriginal, false);
+        }
+
+        // ¡Aquí le mandamos la "tasa" correcta a las gráficas!
+        renderizarGraficas(tasa);
+    }
+
+    // 6. Ejecutar todo al iniciar la página
+    window.onload = function() {
+        convertirMonedas();
+    };
+    
+    
  
     new Chart(document.getElementById('graficaMetodo'), { 
         type: 'bar', 
