@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+{% load humanize %} 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Dashboard Ejecutivo - SI</title> 
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <style> 
+        /* --- ESTILOS MODO OSCURO (DARK MODE) --- */
+        body { 
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            margin: 0; 
+            background: #0f172a; /* Azul marino muy oscuro */
+            color: #e2e8f0; /* Texto gris claro/blanco */
+        } 
+
+        /* Barra de navegación superior */
+        header { 
+            background: #111827; 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        } 
+        
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #0ea5e9; /* Acento cyan */
+        }
+
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-menu a {
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #0ea5e9;
+        }
+
+        .contenedor { 
+            width: 95%; 
+            margin: 30px auto; 
+        } 
+
+        .card { 
+            background: #1e293b; /* Tarjetas oscuras */
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            border: 1px solid #334155;
+        } 
+        
+        .card h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+            font-size: 18px;
+            color: #f8fafc;
+        }
+
+        .grid-kpis { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px;
+        } 
+
+        .kpi { 
+            background: #111827; 
+            border-left: 5px solid #0ea5e9; /* Acento cyan */
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        } 
+
+        .kpi h3 { 
+            margin: 0 0 10px 0; 
+            font-size: 14px; 
+            color: #9ca3af;
+        } 
+
+        .kpi p { 
+            margin: 0; 
+            font-size: 26px; 
+            font-weight: bold; 
+            color: #f8fafc;
+        } 
+
+        .grid-graficas { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); 
+            gap: 20px; 
+        } 
+
+        /* Formularios oscuros */
+        form .fila { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 15px; 
+            align-items: end; 
+        } 
+        
+        label {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select { 
+            padding: 10px; 
+            border-radius: 6px; 
+            background: #334155; /* Entradas oscuras */
+            color: white;
+            border: 1px solid #475569; 
+            width: 100%;
+            box-sizing: border-box;
+        } 
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+        }
+
+        button, a.boton { 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            background: #0ea5e9; /* Azul cyan ejecutivo */
+            color: white; 
+            border: none;
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block; 
+            text-align: center; 
+            font-weight: bold;
+            transition: background 0.3s;
+        } 
+
+        button:hover, a.boton:hover { 
+            background: #0284c7; 
+        } 
+
+        .acciones { 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            margin-top: 15px;
+        } 
+
+        /* Gráficas transparentes para que tomen el color de la tarjeta */
+        canvas { 
+            background: transparent; 
+            padding: 10px; 
+        } 
+    </style> 
+</head> 
+<body> 
+
+<header> 
+    <div>
+        <h1><i class="fa-solid fa-chart-line"></i> SI Comercial</h1> 
+        <p>Dashboard Ejecutivo</p> 
+    </div>
+    <nav class="nav-menu">
+        <a href="#"><i class="fa-solid fa-house"></i> Inicio</a>
+        <a href="{% url 'lista_ventas' %}"><i class="fa-solid fa-list-check"></i> Ventas</a>
+        <a href="#"><i class="fa-solid fa-boxes-stacked"></i> Productos</a>
+        <a href="#"><i class="fa-solid fa-users"></i> Clientes</a>
+    </nav>
+</header> 
+
+<div class="contenedor"> 
+
+    <section class="card"> 
+        <h2><i class="fa-solid fa-filter"></i> Filtros de Análisis</h2> 
+        <form method="get"> 
+            <div class="fila"> 
+                <div>
+                    <label>Moneda</label>
+                    <select id="selector-moneda" onchange="convertirMonedas()">
+                        <option value="MXN" selected>Pesos (MXN)</option>
+                        <option value="USD">Dólares (USD)</option>
+                        <option value="EUR">Euros (EUR)</option>
+                    </select>
+                </div>
+                <div> 
+                    <label>Fecha inicio</label> 
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}"> 
+                </div> 
+                <div> 
+                    <label>Fecha fin</label> 
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin }}"> 
+                </div> 
+                <div> 
+                    <label>Cliente</label> 
+                    <select name="cliente"> 
+                        <option value="">Todos</option> 
+                        {% for cliente in clientes %} 
+                            <option value="{{ cliente.id }}" {% if cliente_id == cliente.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cliente.nombre }}
+                            </option>
+                        {% endfor %} 
+                    </select> 
+                </div> 
+                <div> 
+                    <label>Vendedor</label> 
+                    <select name="vendedor"> 
+                        <option value="">Todos</option> 
+                        {% for vendedor in vendedores %} 
+                            <option value="{{ vendedor.id }}" {% if vendedor_id == vendedor.id|stringformat:"s" %}selected{% endif %}>
+                                {{ vendedor.nombre }}
+                            </option>
+                        {% endfor %} 
+                    </select> 
+                </div> 
+                <div> 
+                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i> Aplicar filtros</button> 
+                </div> 
+            </div> 
+        </form> 
+    </section> 
+
+    <section class="card"> 
+        <h2><i class="fa-solid fa-gauge-high"></i> Indicadores principales</h2> 
+        <div class="grid-kpis"> 
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-sack-dollar" style="color: #10b981;"></i> Total ventas</h3> 
+                <p id="valor-total">${{ total_ventas|floatformat:2 }}</p>
+            </div> 
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-file-invoice" style="color: #6366f1;"></i> Total documentos</h3> 
+                <p id="valor-documentos">{{ total_documentos }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-receipt" style="color: #f59e0b;"></i> Ticket promedio</h3> 
+                <p id="valor-ticket">${{ ticket_promedio|floatformat:2 }}</p> 
+            </div>  
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-arrow-trend-up" style="color: #ef4444;"></i> Venta máxima</h3> 
+                <p id="valor-maxima">${{ venta_maxima|floatformat:2 }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-boxes-stacked" style="color: #8b5cf6;"></i> Productos vendidos</h3> 
+                <p id="valor-productos">{{ total_productos_vendidos }}</p> 
+            </div> 
+            <div class="kpi"> 
+                <h3><i class="fa-solid fa-credit-card" style="color: #3b82f6;"></i> Métodos usados</h3> 
+                <p id="valor-metodos">{{ metodos_usados }}</p> 
+            </div> 
+        </div> 
+    </section> 
+
+    <section class="card"> 
+        <h2><i class="fa-solid fa-bolt"></i> Acciones Rápidas</h2> 
+        <div class="acciones"> 
+            <a class="boton" href="{% url 'reporte_mensual' %}"><i class="fa-regular fa-calendar-days"></i> Reporte mensual</a> 
+            <a class="boton" href="{% url 'dashboard_comparativo' %}"><i class="fa-solid fa-chart-pie"></i> Comparativo</a> 
+            <a class="boton" href="{% url 'exportar_ventas_excel' %}" style="background-color: #10b981;"><i class="fa-solid fa-file-excel"></i> Exportar Excel</a> 
+        </div> 
+    </section> 
+
+    <section class="grid-graficas"> 
+        <div class="card"> 
+            <h2>Ventas por método de pago</h2> 
+            <canvas id="graficaMetodo"></canvas> 
+        </div> 
+
+        <div class="card"> 
+            <h2>Ventas por vendedor</h2> 
+            <canvas id="graficaVendedor"></canvas> 
+        </div> 
+
+        <div class="card"> 
+            <h2>Productos más vendidos</h2> 
+            <canvas id="graficaProductos"></canvas> 
+        </div> 
+
+        <div class="card"> 
+            <h2>Ventas por categoría</h2> 
+            <canvas id="graficaCategoria"></canvas> 
+        </div> 
+    </section> 
+
+</div> 
+
+<script> 
+    
+    Chart.defaults.color = '#9ca3af';
+    Chart.defaults.borderColor = '#334155';
+
+    // Tasas de cambio
+    const tasas = {
+        MXN: 1,
+        USD: 0.059,
+        EUR: 0.049
+    };
+
+    // 2. Valores limpios para los KPIs
+    const totalOriginal = parseFloat("{{ total_ventas|stringformat:'.2f' }}");
+    const ticketOriginal = parseFloat("{{ ticket_promedio|stringformat:'.2f' }}");
+    const maximaOriginal = parseFloat("{{ venta_maxima|stringformat:'.2f' }}");
+
+    const documentosOriginal = parseInt("{{ total_documentos }}");
+    const productosOriginal = parseInt("{{ total_productos_vendidos }}");
+    const metodosOriginal = parseInt("{{ metodos_usados }}");
+
+    // 3. Función de formato profesional
+    function formatear(valor, esMoneda = true){
+        let numeroFormateado = valor.toLocaleString('es-MX', {
+            minimumFractionDigits: esMoneda ? 2 : 0, 
+            maximumFractionDigits: esMoneda ? 2 : 0
+        });
+        if(esMoneda){
+            const selector = document.getElementById('selector-moneda');
+            const monedaActual= selector ? selector.value : 'MXN';
+            const simbolo = (monedaActual === 'EUR') ? '€' : '$';
+            return `${simbolo} ${numeroFormateado}`;
+        }
+        return numeroFormateado;
+    }
+
+    // --- SECCIÓN DE GRÁFICAS ---
+    const ventasPorMetodo = JSON.parse('{{ ventas_por_metodo_json|escapejs }}'); 
+    const ventasPorVendedor = JSON.parse('{{ ventas_por_vendedor_json|escapejs }}'); 
+    const productosMasVendidos = JSON.parse('{{ productos_mas_vendidos_json|escapejs }}'); 
+    const ventasPorCategoria = JSON.parse('{{ ventas_por_categoria_json|escapejs }}'); 
+
+    let chartMetodo, chartVendedor, chartProductos, chartCategoria;
+
+    function renderizarGraficas(tasa) {
+        
+        const idsGraficas = ['graficaMetodo', 'graficaVendedor', 'graficaProductos', 'graficaCategoria'];
+        idsGraficas.forEach(id => {
+            let graficaExistente = Chart.getChart(id); 
+            if (graficaExistente) {
+                graficaExistente.destroy();
+            }
+        });
+
+        const configComun = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatear(context.parsed.y || context.parsed, true);
+                        }
+                    }
+                }
+            }
+        };
+
+        new Chart(document.getElementById('graficaMetodo'), { 
+            type: 'bar', 
+            data: { 
+                labels: ventasPorMetodo.map(x => x.metodo_pago__nombre), 
+                datasets: [{ 
+                    label: 'Total', 
+                    data: ventasPorMetodo.map(x => x.total * tasa),
+                    backgroundColor: '#0ea5e9' // Cyan
+                }] 
+            },
+            options: configComun
+        }); 
+
+        new Chart(document.getElementById('graficaVendedor'), { 
+            type: 'bar', 
+            data: { 
+                labels: ventasPorVendedor.map(x => x.vendedor__nombre), 
+                datasets: [{ 
+                    label: 'Total', 
+                    data: ventasPorVendedor.map(x => x.total * tasa),
+                    backgroundColor: '#10b981' // Verde esmeralda
+                }] 
+            },
+            options: configComun
+        }); 
+
+        new Chart(document.getElementById('graficaProductos'), { 
+            type: 'bar', 
+            data: { 
+                labels: productosMasVendidos.map(x => x.producto__nombre), 
+                datasets: [{ 
+                    label: 'Cantidad', 
+                    data: productosMasVendidos.map(x => x.total_cantidad),
+                    backgroundColor: '#f59e0b' // Ámbar
+                }] 
+            } 
+        }); 
+
+        new Chart(document.getElementById('graficaCategoria'), { 
+            type: 'pie', 
+            data: { 
+                labels: ventasPorCategoria.map(x => x.producto__categoria__nombre), 
+                datasets: [{ 
+                    label: 'Importe',
+                    data: ventasPorCategoria.map(x => x.total_importe * tasa),
+                    backgroundColor: ['#6366f1', '#ec4899', '#8b5cf6', '#0ea5e9']
+                }] 
+            },
+            options: configComun
+        }); 
+    }
+
+    // 5. Función principal de conversión
+    function convertirMonedas(){
+        const selector = document.getElementById('selector-moneda');
+        if (!selector) return; 
+        
+        const monedaSeleccionada = selector.value;
+        const tasa = tasas[monedaSeleccionada]; 
+        
+        const elTotal = document.getElementById('valor-total');
+        const elTicket = document.getElementById('valor-ticket');
+        const elMaxima = document.getElementById('valor-maxima');
+        const elDocs = document.getElementById('valor-documentos');
+        const elProds = document.getElementById('valor-productos');
+        const elMets = document.getElementById('valor-metodos');
+
+        if(elTotal && elTicket && elMaxima && elDocs && elProds && elMets) {
+            elTotal.innerText = formatear(totalOriginal * tasa, true);
+            elTicket.innerText = formatear(ticketOriginal * tasa, true);
+            elMaxima.innerText = formatear(maximaOriginal * tasa, true);
+            
+            elDocs.innerText = formatear(documentosOriginal, false);
+            elProds.innerText = formatear(productosOriginal, false);
+            elMets.innerText = formatear(metodosOriginal, false);
+        }
+
+        renderizarGraficas(tasa);
+    }
+
+    window.onload = function() {
+        convertirMonedas();
+    };
+</script> 
+</body> 
+</html>

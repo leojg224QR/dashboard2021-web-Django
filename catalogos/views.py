@@ -29,3 +29,5 @@ def lista_metodos_pago(request):
     metodos = MetodoPago.objects.all() 
     return render(request, 'catalogos/lista_metodos_pago.html', {'metodos': 
     metodos})
+
+def mercado_tiempo_real(request): return render(request, 'catalogos/mercado_tiempo_real.html')

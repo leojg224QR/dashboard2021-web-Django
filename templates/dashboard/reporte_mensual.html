@@ -1,26 +1,146 @@
-<!DOCTYPE html> 
-<html lang="es"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <title>Reporte Mensual</title> 
-</head> 
-<body> 
-    <h1>Reporte mensual de ventas</h1> 
-    <a href="{% url 'inicio' %}">Volver al dashboard</a> 
- 
-    <table border="1"> 
-        <tr> 
-            <th>Mes</th> 
-            <th>Total ventas</th> 
-            <th>Total documentos</th> 
-        </tr> 
-        {% for item in datos %} 
-        <tr> 
-            <td>{{ item.mes|date:"F Y" }}</td> 
-            <td>{{ item.total_ventas }}</td> 
-            <td>{{ item.total_documentos }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
-</body> 
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Mensual</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc; /* Fondo gris súper claro */
+            margin: 0;
+            padding: 40px;
+            color: #1f2937;
+        }
+
+        /* Bloque oscuro del título */
+        .header-block {
+            background-color: #1e293b; 
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-block h1 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+        }
+
+        .header-block p {
+            margin: 0;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        /* Botones de acción */
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6; /* Azul brillante */
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0; /* Gris claro */
+            color: #334155;
+        }
+
+        /* Contenedor de la tabla */
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        th {
+            background-color: #111827; /* Encabezado de tabla oscuro */
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Redondear las esquinas del encabezado de la tabla */
+        th:first-child { border-top-left-radius: 8px; }
+        th:last-child { border-top-right-radius: 8px; }
+
+        td {
+            font-size: 14px;
+            color: #334155;
+        }
+        
+        /* Asegurar que el total resalte ligeramente */
+        td:last-child {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-block">
+        <h1>Reporte mensual de ventas</h1>
+        <p>Resumen por año y mes de los documentos registrados.</p>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'inicio' %}" class="btn btn-primary">Volver al dashboard</a>
+        <a href="{% url 'dashboard_comparativo' %}" class="btn btn-secondary">Ir al comparativo</a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Año</th>
+                    <th>Mes</th>
+                    <th>Total documentos</th>
+                    <th>Total ventas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in datos %}
+                <tr>
+                    <td>{{ item.mes|date:"Y" }}</td>
+                    <td>{{ item.mes|date:"n" }}</td>
+                    <td>{{ item.total_documentos }}</td>
+                    <td>${{ item.total_ventas|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
 </html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Mercado en tiempo real - SI Ejecutivo</title> 
+    <style> 
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0b1120; 
+            color: #f8fafc; 
+            margin: 0; 
+            padding: 40px;
+        } 
+        
+        .header-main { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 1px solid transparent; /* Sin línea para igualar la imagen */
+        }
+        
+        .header-text h1 { 
+            margin: 0; 
+            font-size: 28px; 
+            font-weight: bold; 
+            letter-spacing: -0.5px;
+        }
+        
+        .header-text p { 
+            margin: 8px 0 0 0; 
+            color: #9ca3af; 
+            font-size: 14px; 
+        }
+        
+        .btn-volver { 
+            background-color: #111827; 
+            border: 1px solid #1e293b; 
+            color: #e2e8f0; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-volver:hover { 
+            background-color: #1e293b; 
+            color: #f8fafc;
+        }
+
+        .grid-mercado {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .card { 
+            background-color: #111827; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 30px 24px; 
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #334155;
+        }
+
+        .card h3 {
+            margin: 0 0 20px 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f8fafc;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-mercado { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-mercado { grid-template-columns: 1fr; }
+            body { padding: 20px; }
+        }
+    </style> 
+</head> 
+<body> 
+
+    <header class="header-main">
+        <div class="header-text">
+            <h1>Mercado en tiempo real</h1>
+            <p>Espacio reservado para indicadores y monitoreo externo del entorno comercial.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <div class="grid-mercado">
+        
+       
+        <div class="card">
+            <h3>Tendencias del mercado</h3>
+            <p>Aquí puedes colocar indicadores externos, precios, comportamiento por región o referencias del entorno.</p>
+        </div>
+
+        
+        <div class="card">
+            <h3>Competencia / contexto</h3>
+            <p>Vista lista para futuras integraciones o widgets de seguimiento.</p>
+        </div>
+
+        <div class="card">
+            <h3>Observaciones estratégicas</h3>
+            <p>Esta pantalla ya existe para que el módulo no rompa mientras lo desarrollamos después.</p>
+        </div>
+
+    </div>
+
+</body> 
+</html>

@@ -1,28 +1,121 @@
 <!DOCTYPE html> 
+{% load humanize %}
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
-    <title>Productos</title> 
+    <title>Lista de Productos - SI Ejecutivo</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> 
+        /* Estilos base Dark Mode */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            margin: 0; 
+        } 
+        
+        /* Menú superior (opcional, para mantener la navegación unificada) */
+        .top-nav { 
+            display: flex; justify-content: flex-end; gap: 10px; 
+            padding: 15px 30px; background-color: #0f172a; align-items: center;
+        }
+        .top-nav a { 
+            color: #cbd5e1; text-decoration: none; font-size: 13px; 
+            padding: 6px 14px; border-radius: 20px; transition: 0.2s; border: 1px solid transparent; 
+        }
+        .top-nav a.active, .top-nav a:hover { border-color: #334155; background-color: #1e293b; color: white; }
+        
+        /* Encabezado idéntico a la imagen */
+        .header-main { 
+            padding: 20px 30px; border-bottom: 1px solid #1e293b; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-main h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .header-main p { margin: 5px 0 0 0; color: #9ca3af; font-size: 14px; }
+        
+        .btn-volver { 
+            background-color: #1e293b; border: 1px solid #334155; color: white; 
+            padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; transition: 0.2s;
+        }
+        .btn-volver:hover { background-color: #334155; }
+
+        /* Contenedor y Tarjeta */
+        .container { padding: 30px; }
+        .card { 
+            background-color: #111827; border: 1px solid #1e293b; 
+            border-radius: 12px; padding: 20px; 
+        }
+
+        /* Estilos de la tabla */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 15px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 13px; }
+        th { color: #f8fafc; font-weight: bold; }
+        tr:hover td { background-color: #1e293b; }
+        
+        /* Etiqueta de Estatus (El óvalo verde) */
+        .badge-activo { 
+            background-color: rgba(16, 185, 129, 0.1); 
+            color: #10b981; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 12px;
+        }
+    </style> 
 </head> 
 <body> 
-    <h1>Listado de productos</h1> 
-    <table border="1"> 
-        <tr> 
-            <th>ID</th> 
-            <th>Código</th> 
-            <th>Nombre</th> 
-            <th>Categoría</th> 
-            <th>Precio</th> 
-        </tr> 
-        {% for producto in productos %} 
-        <tr> 
-            <td>{{ producto.id }}</td> 
-            <td>{{ producto.codigo }}</td> 
-            <td>{{ producto.nombre }}</td> 
-            <td>{{ producto.categoria.nombre }}</td> 
-            <td>{{ producto.precio }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
+
+    <!-- Barra de Navegación -->
+    <nav class="top-nav">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_ventas' %}">Ventas</a>
+        <a href="{% url 'reporte_mensual' %}">Reporte mensual</a>
+        <a href="{% url 'dashboard_comparativo' %}">Comparativo</a>
+        <a href="#">Analítica</a>
+        <a href="#" class="active">Catálogos</a>
+        <a href="#" style="background: #2e1065; color: #fda4af; border-color: #4c1d95;">Cerrar sesión</a>
+    </nav>
+
+    <!-- Encabezado -->
+    <header class="header-main">
+        <div>
+            <h1>Lista de productos</h1>
+            <p>Consulta de productos con categoría, precio y estatus.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <!-- Tabla -->
+    <div class="container">
+        <div class="card">
+            <table> 
+                <thead>
+                    <tr> 
+                        <th>Código</th> 
+                        <th>Producto</th> 
+                        <th>Categoría</th> 
+                        <th>Precio</th> 
+                        <th>Stock</th>
+                        <th>Estatus</th>
+                    </tr> 
+                </thead>
+                <tbody>
+                    {% for producto in productos %} 
+                    <tr> 
+                        <td style="color: #cbd5e1;">{{ producto.codigo }}</td> 
+                        <td style="color: #f8fafc;">{{ producto.nombre }}</td> 
+                        <td style="color: #cbd5e1;">{{ producto.categoria.nombre }}</td> 
+                        <!-- Agregamos el formato de moneda con filtro de Django -->
+                        <td style="color: #cbd5e1;">${{ producto.precio|floatformat:2|intcomma }}</td> 
+                        <!-- Usamos filter default por si no tienes el campo stock configurado aún -->
+                        <td style="color: #cbd5e1;">{{ producto.stock|default:"0" }}</td> 
+                        <td><span class="badge-activo">Activo</span></td> 
+                    </tr> 
+                    {% endfor %} 
+                </tbody>
+            </table> 
+        </div>
+    </div>
+
 </body> 
 </html>

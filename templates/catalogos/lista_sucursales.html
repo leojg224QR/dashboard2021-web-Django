@@ -2,27 +2,159 @@
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
-    <title>Sucursales</title> 
+    <title>Lista de Sucursales - SI Ejecutivo</title> 
+    <style> 
+        /* --- ESTILOS BASE --- */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0b1120; /* Fondo oscuro principal */
+            color: #f8fafc; 
+            margin: 0; 
+            padding: 40px;
+        } 
+        
+        /* --- ENCABEZADO --- */
+        .header-main { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        
+        .header-text h1 { 
+            margin: 0; 
+            font-size: 28px; 
+            font-weight: 700; 
+        }
+        
+        .header-text p { 
+            margin: 8px 0 0 0; 
+            color: #94a3b8; 
+            font-size: 14px; 
+        }
+        
+        .btn-volver { 
+            background-color: #1e293b; 
+            border: 1px solid #334155; 
+            color: #f8fafc; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-volver:hover { 
+            background-color: #334155; 
+        }
+
+        /* --- CUADRÍCULA DE TARJETAS (GRID) --- */
+        .grid-sucursales {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+            gap: 24px; /* Espacio entre tarjetas */
+        }
+
+        /* --- DISEÑO DE LA TARJETA --- */
+        .card { 
+            background-color: #111827; /* Fondo de tarjeta un poco más claro que el body */
+            border: 1px solid #1e293b; 
+            border-radius: 16px; 
+            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px); /* Efecto de elevación al pasar el mouse */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: #334155;
+        }
+
+        /* --- IMAGEN --- */
+        .card-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover; /* Evita que la imagen se estire feo */
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background-color: #1e293b; 
+        }
+
+        /* --- TEXTOS DE LA TARJETA --- */
+        .card-title {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .card-subtitle {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        /* --- ETIQUETA (BADGE) --- */
+        .badge-activa { 
+            background-color: rgba(16, 185, 129, 0.15); /* Fondo verde semitransparente */
+            color: #10b981; /* Texto verde */
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 12px;
+            align-self: flex-start; /* Evita que el botón ocupe todo el ancho */
+        }
+
+        /* Responsive: Ajusta a 2 o 1 columna en pantallas más pequeñas */
+        @media (max-width: 1024px) {
+            .grid-sucursales { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-sucursales { grid-template-columns: 1fr; }
+        }
+    </style> 
 </head> 
 <body> 
-    <h1>Listado de sucursales</h1> 
-    <table border="1"> 
-        <tr> 
-            <th>ID</th> 
-            <th>Nombre</th> 
-            <th>Ciudad</th> 
-            <th>Estado</th> 
-            <th>País</th> 
-        </tr> 
+
+    <!-- Encabezado -->
+    <header class="header-main">
+        <div class="header-text">
+            <h1>Lista de sucursales</h1>
+            <p>Vista de sedes con imagen dinámica y datos geográficos.</p>
+        </div>
+        <!-- Asegúrate de tener la ruta correcta hacia tu inicio -->
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <!-- Contenedor del Grid -->
+    <div class="grid-sucursales">
+        
+        <!-- Bucle de Django -->
         {% for sucursal in sucursales %} 
-        <tr> 
-            <td>{{ sucursal.id }}</td> 
-            <td>{{ sucursal.nombre }}</td> 
-            <td>{{ sucursal.ciudad }}</td> 
-            <td>{{ sucursal.estado }}</td> 
-            <td>{{ sucursal.pais }}</td> 
-        </tr> 
+        <div class="card">
+            
+            <!-- Imagen dinámica -->
+            <!-- Nota para ti: Cuando tengas tus imágenes, cambia el src por: src="{{ sucursal.imagen.url }}" -->
+            <img src="https://picsum.photos/seed/{{ sucursal.id }}/400/200" alt="Sede {{ sucursal.nombre }}" class="card-img">
+            
+            <!-- Título: Nombre de la sucursal -->
+            <h3 class="card-title">{{ sucursal.nombre }}</h3>
+            
+            <!-- Subtítulo: Datos geográficos separados por un punto medio (&middot;) -->
+            <p class="card-subtitle">
+                {{ sucursal.ciudad }} &middot; {{ sucursal.estado }} &middot; {{ sucursal.pais }}
+            </p>
+            
+            <!-- Estatus -->
+            <span class="badge-activa">Activa</span>
+            
+        </div>
         {% endfor %} 
-    </table> 
+
+    </div>
+
 </body> 
 </html>

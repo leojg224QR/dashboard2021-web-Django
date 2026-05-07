@@ -2,21 +2,114 @@
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
-    <title>Categorías</title> 
+    <title>Categorías - SI Ejecutivo</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> 
+        /* Estilos base Dark Mode */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            margin: 0; 
+        } 
+        
+        /* Barra de navegación */
+        .top-nav { 
+            display: flex; justify-content: flex-end; gap: 10px; 
+            padding: 15px 30px; background-color: #0f172a; align-items: center;
+        }
+        .top-nav a { 
+            color: #cbd5e1; text-decoration: none; font-size: 13px; 
+            padding: 6px 14px; border-radius: 20px; transition: 0.2s; border: 1px solid transparent; 
+        }
+        .top-nav a.active, .top-nav a:hover { border-color: #334155; background-color: #1e293b; color: white; }
+        
+        /* Encabezado */
+        .header-main { 
+            padding: 20px 30px; border-bottom: 1px solid #1e293b; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-main h1 { margin: 0; font-size: 24px; font-weight: bold; color: #0ea5e9; }
+        .header-main p { margin: 5px 0 0 0; color: #9ca3af; font-size: 14px; }
+        
+        .btn-volver { 
+            background-color: #1e293b; border: 1px solid #334155; color: white; 
+            padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; transition: 0.2s;
+        }
+        .btn-volver:hover { background-color: #334155; }
+
+        /* Contenedor centralizado para catálogos */
+        .container { 
+            padding: 30px; 
+            max-width: 800px; /* Hacemos que la tabla no ocupe toda la pantalla a lo ancho */
+            margin: 0 auto; 
+        }
+
+        .card { 
+            background-color: #111827; border: 1px solid #1e293b; 
+            border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+        }
+
+        /* Estilos de la tabla */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 14px; }
+        th { color: #9ca3af; text-transform: uppercase; font-size: 12px; background-color: #0f172a; }
+        tr:hover { background-color: #1e293b; }
+        
+        /* Etiqueta visual para el ID */
+        .badge-id { 
+            background-color: rgba(14, 165, 233, 0.1); 
+            color: #0ea5e9; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            font-family: monospace; 
+            font-size: 13px;
+        }
+    </style> 
 </head> 
 <body> 
-    <h1>Listado de categorías</h1> 
-    <table border="1"> 
-        <tr> 
-            <th>ID</th> 
-            <th>Nombre</th> 
-        </tr> 
-        {% for categoria in categorias %} 
-        <tr> 
-            <td>{{ categoria.id }}</td> 
-            <td>{{ categoria.nombre }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
+
+    <!-- Menú Superior -->
+    <nav class="top-nav">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_ventas' %}">Ventas</a>
+        <a href="{% url 'reporte_mensual' %}">Reporte</a>
+        <a href="{% url 'dashboard_comparativo' %}">Comparativo</a>
+        <a href="#" class="active">Catálogos</a>
+        <a href="#" style="background: #2e1065; color: #fda4af; border-color: #4c1d95;">Cerrar sesión</a>
+    </nav>
+
+    <!-- Título de la sección -->
+    <header class="header-main">
+        <div>
+            <h1><i class="fa-solid fa-tags"></i> Listado de Categorías</h1>
+            <p>Gestión del catálogo de clasificaciones de productos.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver al panel</a>
+    </header>
+
+    <!-- Tabla de datos -->
+    <div class="container">
+        <div class="card">
+            <table> 
+                <thead>
+                    <tr> 
+                        <th width="80px">ID</th> 
+                        <th>Nombre de la Categoría</th> 
+                    </tr> 
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %} 
+                    <tr> 
+                        <td><span class="badge-id">#{{ categoria.id }}</span></td> 
+                        <td>{{ categoria.nombre }}</td> 
+                    </tr> 
+                    {% endfor %} 
+                </tbody>
+            </table> 
+        </div>
+    </div>
+
 </body> 
-</html> 
+</html>

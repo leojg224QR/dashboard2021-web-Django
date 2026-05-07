@@ -1,100 +1,233 @@
-<!DOCTYPE html> 
-<html lang="es"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <title>Comparativo</title> 
-    <style> 
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Comparativo - SI Ejecutivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f4f6f9; 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
             margin: 0; 
-            padding: 20px; 
-        } 
- 
-        .header { 
-            background: linear-gradient(135deg, #111827, #1f2937); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-        } 
- 
+        }
+        
+        /* Barra de navegación idéntica a inicio */
+        .top-nav { 
+            display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; 
+            padding: 15px 30px; background-color: #0f172a; align-items: center;
+        }
+        .top-nav a { 
+            color: #cbd5e1; text-decoration: none; font-size: 13px; 
+            padding: 6px 14px; border-radius: 20px; transition: 0.2s; border: 1px solid transparent; 
+        }
+        .top-nav a.active, .top-nav a:hover { border-color: #334155; background-color: #1e293b; color: white; }
+        
+        /* Encabezado */
+        .header-main { 
+            padding: 20px 30px; border-bottom: 1px solid #1e293b; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-main h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .header-main p { margin: 5px 0 0 0; color: #9ca3af; font-size: 14px; }
+        .btn-volver { 
+            background-color: #1e293b; border: 1px solid #334155; color: white; 
+            padding: 10px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; 
+            transition: 0.2s;
+        }
+        .btn-volver:hover { background-color: #334155; }
+
+        .container { padding: 30px; }
+
+        /* Contenedor del selector de moneda */
+        .filtro-moneda {
+            background-color: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .filtro-moneda label { font-size: 13px; color: #9ca3af; display: block; margin-bottom: 10px;}
+        .filtro-moneda select { 
+            width: 100%; padding: 12px; background-color: #0f172a; 
+            color: white; border: 1px solid #334155; border-radius: 6px; outline: none;
+            font-size: 14px;
+        }
+        .moneda-activa-txt { margin-top: 15px; font-size: 13px; font-weight: bold; color: #9ca3af;}
+
+        /* Rejilla de las 3 tablas */
+        .grid-comparativo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
         .card { 
-            background: white; 
+            background-color: #111827; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
             padding: 20px; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-        } 
- 
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        } 
- 
-        th, td { 
-            border: 1px solid #d1d5db; 
-            padding: 10px; 
-        } 
- 
+        }
+        .card h3 { margin-top: 0; font-size: 16px; margin-bottom: 20px; font-weight: bold;}
+
+        /* Diseño de tabla exacto a la imagen */
+        table { width: 100%; border-collapse: collapse; }
         th { 
-            background: #e5e7eb; 
-        } 
-    </style> 
-</head> 
-<body> 
- 
-<div class="header"> 
-    <h1>Dashboard comparativo</h1> 
-    <a href="{% url 'inicio' %}" style="color:white;">Volver al dashboard</a> 
-</div> 
- 
-<div class="card"> 
-    <h2>Comparativo por categoría</h2> 
-    <table> 
-        <tr> 
-            <th>Categoría</th> 
-            <th>Total</th> 
-        </tr> 
-        {% for item in comparativo_categorias %} 
-        <tr> 
-            <td>{{ item.producto__categoria__nombre }}</td> 
-            <td>{{ item.total }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
-</div> 
- 
-<div class="card"> 
-    <h2>Comparativo por ciudad</h2> 
-    <table> 
-        <tr> 
-            <th>Ciudad</th> 
-            <th>Total</th> 
-        </tr> 
-        {% for item in comparativo_ciudades %} 
-        <tr> 
-            <td>{{ item.sucursal__ciudad }}</td> 
-            <td>{{ item.total }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
-</div> 
- 
-<div class="card"> 
-    <h2>Comparativo por método de pago</h2> 
-    <table> 
-        <tr> 
-            <th>Método</th> 
-            <th>Total</th> 
-        </tr> 
-        {% for item in comparativo_metodos %} 
-        <tr> 
-            <td>{{ item.metodo_pago__nombre }}</td> 
-            <td>{{ item.total }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
-</div> 
- 
-</body> 
+            background-color: #1e293b; /* Fondo oscuro sólido en el encabezado */
+            color: #f8fafc; 
+            font-weight: bold; 
+            font-size: 13px; 
+            padding: 12px 15px; 
+            text-align: left; 
+        }
+        th:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+        th:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; text-align: right; }
+        
+        td { 
+            padding: 14px 15px; 
+            border-bottom: 1px solid #1e293b; 
+            font-size: 13px; 
+            color: #cbd5e1;
+        }
+        tr:hover td { background-color: #1e293b; color: white; } /* Efecto hover opcional */
+        .valor { text-align: right; }
+    </style>
+</head>
+<body>
+
+    <!-- Menú completo igual al panel principal -->
+    <nav class="top-nav">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_ventas' %}">Ventas</a>
+        <a href="{% url 'reporte_mensual' %}">Reporte mensual</a>
+        <a href="{% url 'dashboard_comparativo' %}" class="active">Comparativo</a>
+        <a href="#">Analítica</a>
+        <a href="#">Agente guía</a>
+        <a href="#">Productos</a>
+        <a href="#">Clientes</a>
+        <a href="#">Vendedores</a>
+        <a href="#">Sucursales</a>
+        <a href="#">Métodos de pago</a>
+        <a href="#">Mercado</a>
+        <a href="#">Admin</a>
+        <a href="#" style="background: #2e1065; color: #fda4af; border-color: #4c1d95;">Cerrar sesión</a>
+    </nav>
+
+    <header class="header-main">
+        <div>
+            <h1>Dashboard comparativo</h1>
+            <p>Comparativo de ventas por categoría, ciudad y método de pago.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al dashboard</a>
+    </header>
+
+    <div class="container">
+        
+        <!-- Selector de Moneda -->
+        <div class="filtro-moneda">
+            <label>Moneda de visualización</label>
+            <select id="selector-moneda" onchange="actualizarMonedas()">
+                <option value="MXN">MXN</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+            </select>
+            <div class="moneda-activa-txt" id="texto-moneda-activa">Moneda activa: Pesos mexicanos</div>
+        </div>
+
+        <div class="grid-comparativo">
+            <!-- Columna Por Categoría -->
+            <div class="card">
+                <h3>Por categoría</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th class="valor encabezado-moneda">Total (MXN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in comparativo_categorias %}
+                        <tr>
+                            <td>{{ c.producto__categoria__nombre }}</td>
+                            <td class="valor celda-dinero" data-original="{{ c.total|stringformat:'.2f' }}">${{ c.total|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Columna Por Ciudad -->
+            <div class="card">
+                <h3>Por ciudad</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ciudad</th>
+                            <th class="valor encabezado-moneda">Total (MXN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in comparativo_ciudades %}
+                        <tr>
+                            <td>{{ c.sucursal__ciudad }}</td>
+                            <td class="valor celda-dinero" data-original="{{ c.total|stringformat:'.2f' }}">${{ c.total|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Columna Por Método de Pago -->
+            <div class="card">
+                <h3>Por método de pago</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Método de pago</th>
+                            <th class="valor encabezado-moneda">Total (MXN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in comparativo_metodos %}
+                        <tr>
+                            <td>{{ m.metodo_pago__nombre }}</td>
+                            <td class="valor celda-dinero" data-original="{{ m.total|stringformat:'.2f' }}">${{ m.total|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de conversión de moneda en tiempo real -->
+    <script>
+        const tasas = { MXN: 1, USD: 0.050, EUR: 0.046 }; 
+        const nombresMoneda = { MXN: "Pesos mexicanos", USD: "Dólares estadounidenses", EUR: "Euros" };
+        const simbolos = { MXN: "$", USD: "$", EUR: "€" };
+
+        function actualizarMonedas() {
+            const moneda = document.getElementById('selector-moneda').value;
+            const tasa = tasas[moneda];
+            const simbolo = simbolos[moneda];
+            
+            // Actualiza el texto de moneda activa
+            document.getElementById('texto-moneda-activa').innerText = "Moneda activa: " + nombresMoneda[moneda];
+
+            // Actualiza los encabezados oscuros de las tablas
+            document.querySelectorAll('.encabezado-moneda').forEach(th => {
+                th.innerText = `Total (${moneda})`;
+            });
+
+            // Recalcula los montos
+            document.querySelectorAll('.celda-dinero').forEach(td => {
+                let valorBase = parseFloat(td.getAttribute('data-original'));
+                let nuevoValor = valorBase * tasa;
+                let valorFormateado = nuevoValor.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                td.innerText = `${simbolo}${valorFormateado}`;
+            });
+        }
+    </script>
+</body>
 </html>

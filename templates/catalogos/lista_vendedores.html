@@ -2,23 +2,179 @@
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
-    <title>Vendedores</title> 
+    <title>Lista de Vendedores - SI Ejecutivo</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> 
+       
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            margin: 0; 
+        } 
+        
+        /* Menú superior */
+        .top-nav { 
+            display: flex; 
+            justify-content: 
+            flex-end; 
+            gap: 10px; 
+            padding: 15px 30px; 
+            background-color: #0f172a; 
+            align-items: center;
+        }
+        .top-nav a { 
+            color: #cbd5e1; text-decoration: none; font-size: 13px; 
+            padding: 6px 14px; border-radius: 20px; transition: 0.2s; border: 1px solid transparent; 
+        }
+        .top-nav a.active, .top-nav a:hover { border-color: #334155; background-color: #1e293b; color: white; }
+        
+      
+        .header-main { 
+            padding: 20px 30px; border-bottom: 1px solid #1e293b; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-main h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .header-main p { margin: 5px 0 0 0; color: #9ca3af; font-size: 14px; }
+        
+        .btn-volver { 
+            background-color: #1e293b; border: 1px solid #334155; color: white; 
+            padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; transition: 0.2s;
+        }
+        .btn-volver:hover { background-color: #334155; }
+
+        /* Contenedor y Tarjeta */
+        .container { padding: 30px; }
+        .card { 
+            background-color: #111827; border: 1px solid #1e293b; 
+            border-radius: 12px; padding: 20px; 
+        }
+
+        /* Estilos de la tabla */
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background-color: #1e293b; 
+            color: #f8fafc; 
+            font-weight: bold; 
+            font-size: 13px; 
+            padding: 14px 15px; 
+            text-align: left; 
+        }
+        th:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+        th:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+        
+        td { 
+            padding: 14px 15px; 
+            border-bottom: 1px solid #1e293b; 
+            font-size: 13px; 
+            color: #cbd5e1;
+        }
+        tr:hover td { background-color: #1e293b; color: white; }
+        
+        /* Estilos específicos para las iniciales */
+        .columna-vendedor {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #f8fafc;
+        }
+        .iniciales {
+            font-weight: 600;
+            color: #f8fafc;
+            width: 25px; 
+            letter-spacing: 1px;
+        }
+
+        /* Etiqueta de Estatus */
+        .badge-activo { 
+            background-color: rgba(16, 185, 129, 0.1); 
+            color: #10b981; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 12px;
+        }
+    </style> 
 </head> 
 <body> 
-    <h1>Listado de vendedores</h1> 
-    <table border="1"> 
-        <tr> 
-            <th>ID</th> 
-            <th>Nombre</th> 
-            <th>Sucursal</th> 
-        </tr> 
-        {% for vendedor in vendedores %} 
-        <tr> 
-            <td>{{ vendedor.id }}</td> 
-            <td>{{ vendedor.nombre }}</td> 
-            <td>{{ vendedor.sucursal.nombre }}</td> 
-        </tr> 
-        {% endfor %} 
-    </table> 
+
+    <!-- Barra de Navegación -->
+    <nav class="top-nav">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_ventas' %}">Ventas</a>
+        <a href="{% url 'reporte_mensual' %}">Reporte mensual</a>
+        <a href="{% url 'dashboard_comparativo' %}">Comparativo</a>
+        <a href="#">Analítica</a>
+        <a href="#" class="active">Catálogos</a>
+        <a href="#" style="background: #2e1065; color: #fda4af; border-color: #4c1d95;">Cerrar sesión</a>
+    </nav>
+
+    <!-- Encabezado -->
+    <header class="header-main">
+        <div>
+            <h1>Lista de vendedores</h1>
+            <p>Directorio comercial con identificación visual automática.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <!-- Tabla -->
+    <div class="container">
+        <div class="card">
+            <table> 
+                <thead>
+                    <tr> 
+                        <th>Vendedor</th> 
+                        <th>Correo</th> 
+                        <th>Teléfono</th> 
+                        <th>Sucursal</th> 
+                        <th>Estatus</th>
+                    </tr> 
+                </thead>
+                <tbody>
+                    {% for vendedor in vendedores %} 
+                    <tr> 
+                        <td>
+                            <div class="columna-vendedor">
+                                <span class="iniciales"></span>
+                                <span class="nombre-real">{{ vendedor.nombre }}</span>
+                            </div>
+                        </td> 
+                        
+                        <td>Sin correo</td> 
+                        <td>Sin teléfono</td> 
+                        
+                        <td>{{ vendedor.sucursal.nombre }}</td> 
+                        
+                        <td><span class="badge-activo">Activo</span></td> 
+                    </tr> 
+                    {% endfor %} 
+                </tbody>
+            </table> 
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Selecciona todos los nombres de la tabla
+            const nombres = document.querySelectorAll('.nombre-real');
+            
+            nombres.forEach(function(elemento) {
+                const palabras = elemento.innerText.trim().split(' ');
+                let inicialesExtraidas = '';
+                
+                if (palabras.length > 0 && palabras[0].length > 0) {
+                    inicialesExtraidas += palabras[0][0];
+                }
+                if (palabras.length > 1 && palabras[1].length > 0) {
+                    inicialesExtraidas += palabras[1][0];
+                }
+                
+                // Coloca las iniciales generadas en la etiqueta <span> vacía que está al lado
+                const spanIniciales = elemento.previousElementSibling;
+                spanIniciales.innerText = inicialesExtraidas.toUpperCase();
+            });
+        });
+    </script>
 </body> 
 </html>

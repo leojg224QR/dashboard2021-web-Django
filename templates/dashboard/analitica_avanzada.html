@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Analítica Avanzada - SI Ejecutivo</title>
+    <!-- FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b1120;
+            color: #f8fafc;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        .header-text h1 { margin: 0; font-size: 28px; font-weight: bold; }
+        .header-text p { margin: 8px 0 0 0; color: #94a3b8; font-size: 14px; }
+        
+        .btn-volver {
+            background-color: #111827; border: 1px solid #1e293b; color: #e2e8f0;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none;
+            font-size: 14px; font-weight: 500; transition: all 0.2s ease;
+        }
+        .btn-volver:hover { background-color: #1e293b; color: #f8fafc; }
+
+        .card {
+            background-color: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-section { margin-bottom: 24px; }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-size: 12px; color: #94a3b8; }
+        .filter-group input, .filter-group select {
+            background-color: #0f172a; border: 1px solid #1e293b;
+            color: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 13px;
+        }
+        .filter-group select[multiple] { height: 120px; overflow-y: auto; padding: 5px; }
+        .filter-group select[multiple] option { padding: 4px 8px; border-radius: 4px; margin-bottom: 2px;}
+        .filter-group select[multiple] option:checked { background-color: #0ea5e9; color: white; }
+
+        .filters-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-primary { background-color: #0ea5e9; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-secondary { background-color: transparent; color: #f8fafc; border: 1px solid #334155; padding: 8px 20px; border-radius: 6px; cursor: pointer; }
+
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;
+        }
+        .kpi-card h3 { margin: 0 0 10px 0; font-size: 13px; color: #94a3b8; font-weight: normal; }
+        .kpi-card .value { margin: 0; font-size: 28px; font-weight: bold; color: #f8fafc; }
+
+        .dashboard-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;
+        }
+        .full-width { grid-column: span 2; }
+        
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        
+        .section-title { margin: 0 0 15px 0; font-size: 16px; font-weight: bold; color: #f8fafc; }
+        
+        .stat-text { margin: 5px 0; font-size: 14px; font-weight: bold; color: #e2e8f0; }
+        .stat-desc { margin: 15px 0 0 0; font-size: 13px; color: #94a3b8; }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 13px; }
+        th { color: #94a3b8; font-weight: normal; }
+        .avatar { 
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; background-color: #1e293b; color: #0ea5e9;
+            border-radius: 50%; margin-right: 10px; font-weight: bold; font-size: 12px;
+        }
+        .flex-row { display: flex; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <header class="header-main">
+        <div class="header-text">
+            <h1>Analítica avanzada</h1>
+            <p>Estadística, tendencias, ANOVA, regresión, proyecciones, alertas e insights con multiselección y filtros compatibles.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <form method="GET" action="{% url 'analitica_avanzada' %}" class="card filters-section">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>Fecha inicio</label>
+                <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+            </div>
+            <div class="filter-group">
+                <label>Fecha fin</label>
+                <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
+            </div>
+            <div class="filter-group">
+                <label>Moneda de visualización</label>
+                <select name="moneda">
+                    <option value="MXN" {% if request.GET.moneda == 'MXN' or not request.GET.moneda %}selected{% endif %}>MXN</option>
+                    <option value="USD" {% if request.GET.moneda == 'USD' %}selected{% endif %}>USD</option>
+                    <option value="EUR" {% if request.GET.moneda == 'EUR' %}selected{% endif %}>EUR</option>
+                </select>
+            </div>
+            
+            <!-- NUEVO: Selector de Cliente -->
+            <div class="filter-group">
+                <label>Cliente</label>
+                <select name="clientes" multiple>
+                    {% for cliente in cat_clientes %}
+                        <option value="{{ cliente.id }}" {% if cliente.id|stringformat:"s" in request.GET.clientes %}selected{% endif %}>
+                            {{ cliente.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Vendedor</label>
+                <select name="vendedores" multiple>
+                    {% for vendedor in cat_vendedores %}
+                        <option value="{{ vendedor.id }}" {% if vendedor.id|stringformat:"s" in request.GET.vendedores %}selected{% endif %}>
+                            {{ vendedor.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Categoría</label>
+                <select name="categorias" multiple>
+                    {% for categoria in cat_categorias %}
+                        <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" in request.GET.categorias %}selected{% endif %}>
+                            {{ categoria.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- NUEVO: Selector de Método de Pago -->
+            <div class="filter-group">
+                <label>Método de pago</label>
+                <select name="metodos_pago" multiple>
+                    {% for metodo in cat_metodos %}
+                        <option value="{{ metodo.id }}" {% if metodo.id|stringformat:"s" in request.GET.metodos_pago %}selected{% endif %}>
+                            {{ metodo.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin: 10px 0 0 0;">
+            Mantén presionada la tecla Ctrl o Cmd para seleccionar múltiples elementos.<br>
+            <strong>Moneda activa en gráficos: {{ moneda_activa }}</strong>
+        </p>
+        <div class="filters-actions">
+            <!-- Botón tipo submit para enviar el formulario -->
+            <button type="submit" class="btn-primary">Aplicar filtros</button>
+            <a href="{% url 'analitica_avanzada' %}" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- KPIs Dinámicos -->
+    <div class="kpi-grid">
+        <div class="card kpi-card">
+            <h3>Ventas analizadas</h3>
+            <p class="value">{{ kpis.ventas_analizadas|default:"0" }}</p>
+        </div>
+        <div class="card kpi-card">
+            <h3>Monto total (MXN)</h3>
+            <p class="value">${{ kpis.monto_total|default:"0"|floatformat:2|intcomma }}</p>
+        </div>
+        <div class="card kpi-card">
+            <h3>Promedio (MXN)</h3>
+            <p class="value">${{ kpis.promedio|default:"0"|floatformat:2|intcomma }}</p>
+        </div>
+        <div class="card kpi-card">
+            <h3>Máximo (MXN)</h3>
+            <p class="value">${{ kpis.maximo|default:"0"|floatformat:2|intcomma }}</p>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        
+        <div class="card">
+            <h2 class="section-title">Tendencia mensual</h2>
+            <div class="chart-container">
+                <canvas id="tendenciaChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Estacionalidad promedio</h2>
+            <div class="chart-container">
+                <canvas id="estacionalidadChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabla dinámica de ANOVA -->
+        <div class="card">
+            <h2 class="section-title">Análisis de Varianza (ANOVA)</h2>
+            <p class="stat-desc" style="margin-bottom: 15px;">Evaluación de factores que afectan el nivel de ingresos (p < 0.05):</p>
+            
+            <table style="width: 100%; font-size: 13px;">
+                <tr style="color: #94a3b8; border-bottom: 1px solid #1e293b;">
+                    <th style="padding-bottom: 5px;">Factor</th>
+                    <th style="padding-bottom: 5px;">P-Value</th>
+                    <th style="padding-bottom: 5px;">Interpretación</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #f8fafc;">Categoría</td>
+                    <td style="padding: 8px 0;">{{ anova.categoria.p_value }}</td>
+                    <td style="padding: 8px 0;">{{ anova.categoria.mensaje }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #f8fafc;">Vendedor</td>
+                    <td style="padding: 8px 0;">{{ anova.vendedor.p_value }}</td>
+                    <td style="padding: 8px 0;">{{ anova.vendedor.mensaje }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #f8fafc;">Forma de Pago</td>
+                    <td style="padding: 8px 0;">{{ anova.pago.p_value }}</td>
+                    <td style="padding: 8px 0;">{{ anova.pago.mensaje }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #f8fafc;">Temporalidad (Mes)</td>
+                    <td style="padding: 8px 0;">{{ anova.mes.p_value }}</td>
+                    <td style="padding: 8px 0;">{{ anova.mes.mensaje }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Regresión y predicción</h2>
+            <p class="stat-text">Pendiente: 15537.991</p>
+            <p class="stat-text">Intercepto: 19271285.7573</p>
+            <p class="stat-text">R²: 0.0389</p>
+            <p class="stat-desc">Predicción generada correctamente con los filtros actuales.</p>
+        </div>
+
+        <div class="card full-width">
+            <h2 class="section-title">Predicción de ventas</h2>
+            <div class="chart-container">
+                <canvas id="prediccionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Vendedores Dinámico -->
+        <div class="card">
+            <h2 class="section-title">Top vendedores</h2>
+            <div class="table-container">
+                <table>
+                    <tr><th>Vendedor</th><th style="text-align: right;">Total (MXN)</th></tr>
+                    {% for vendedor in top_vendedores %}
+                    <tr>
+                        <td>
+                            <div class="flex-row">
+                                <span class="avatar">{{ vendedor.vendedor__nombre|slice:":1" }}</span> 
+                                {{ vendedor.vendedor__nombre }}
+                            </div>
+                        </td>
+                        <td style="text-align: right;">${{ vendedor.total_vendido|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2">No hay ventas registradas.</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Top Sucursales Dinámico -->
+        <div class="card">
+            <h2 class="section-title">Top sucursales</h2>
+            <div class="table-container">
+                <table>
+                    <tr><th>Sucursal</th><th style="text-align: right;">Total (MXN)</th></tr>
+                    {% for sucursal in top_sucursales %}
+                    <tr>
+                        <td>{{ sucursal.sucursal__nombre }}</td>
+                        <td style="text-align: right;">${{ sucursal.total_vendido|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2">No hay ventas registradas.</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+            <h2 class="section-title">Proyección por categoría</h2>
+            <ul style="list-style-type: disc; padding-left: 20px; line-height: 2; margin: 0; font-size: 14px;">
+                {% for cat in proyeccion_categoria %}
+                <li><strong>{{ cat.producto__categoria__nombre }}:</strong> ${{ cat.total_proyectado|floatformat:2|intcomma }}</li>
+                {% empty %}
+                <li style="color: #94a3b8;">Sin datos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Proyección por método de pago</h2>
+            <ul style="list-style-type: disc; padding-left: 20px; line-height: 2; margin: 0; font-size: 14px;">
+                {% for met in proyeccion_metodo %}
+                <li><strong>{{ met.metodo_pago__nombre }}:</strong> ${{ met.total_proyectado|floatformat:2|intcomma }}</li>
+                {% empty %}
+                <li style="color: #94a3b8;">Sin datos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div> <!-- OJO: Cerramos el dashboard-grid principal de 2 columnas aquí -->
+
+    <!-- Nueva fila de 3 columnas para Alertas e Insights -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 30px;">
+        
+        <!-- Alertas Inteligentes -->
+        <div class="card">
+            <h2 class="section-title">Alertas inteligentes</h2>
+            <ul style="list-style-type: disc; padding-left: 20px; line-height: 1.8; margin: 0; font-size: 13px; color: #cbd5e1;">
+                {% if insight_vendedor %}
+                <li>Liderazgo actual: {{ insight_vendedor.vendedor__nombre }} encabeza el resultado con ${{ insight_vendedor.total_vendido|floatformat:2|intcomma }}.</li>
+                {% endif %}
+                {% if insight_metodo %}
+                <li>El método de pago dominante en esta selección es {{ insight_metodo.metodo_pago__nombre }}.</li>
+                {% endif %}
+                {% if insight_categoria %}
+                <li>La categoría con mayor peso dentro de los filtros actuales es {{ insight_categoria.producto__categoria__nombre }}.</li>
+                {% endif %}
+                {% if not insight_vendedor %}
+                <li>Aplica filtros para generar alertas automáticas.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Hallazgos Automáticos -->
+        <div class="card">
+            <h2 class="section-title">Hallazgos automáticos</h2>
+            <ul style="list-style-type: disc; padding-left: 20px; line-height: 1.8; margin: 0; font-size: 13px; color: #cbd5e1;">
+                {% if insight_cliente_nombre %}
+                <li>El cliente con mayor aportación en esta selección es {{ insight_cliente_nombre }} con ${{ insight_cliente_total|floatformat:2|intcomma }}.</li>
+                {% endif %}
+                {% if insight_vendedor %}
+                <li>El vendedor con mejor desempeño filtrado es {{ insight_vendedor.vendedor__nombre }}.</li>
+                {% endif %}
+                {% if insight_metodo %}
+                <li>El método de pago más fuerte para esta vista es {{ insight_metodo.metodo_pago__nombre }}.</li>
+                {% endif %}
+                {% if insight_categoria %}
+                <li>La categoría líder bajo los filtros activos es {{ insight_categoria.producto__categoria__nombre }} con ${{ insight_categoria.total_proyectado|floatformat:2|intcomma }}.</li>
+                {% endif %}
+                {% if insight_mes %}
+                <li>El mes con mejor promedio dentro del subconjunto actual es {{ insight_mes|date:"F"|title }}.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Recomendaciones Estáticas -->
+        <div class="card">
+            <h2 class="section-title">Recomendaciones</h2>
+            <ul style="list-style-type: disc; padding-left: 20px; line-height: 1.8; margin: 0; font-size: 13px; color: #cbd5e1;">
+                <li>Usa la multiselección para construir subconjuntos precisos y reducir ruido estadístico.</li>
+                <li>Selecciona varios vendedores para comparar desempeño colectivo contra el total.</li>
+                <li>Selecciona varios clientes estratégicos para evaluar concentración comercial.</li>
+                <li>Selecciona múltiples categorías para contrastar mix, ticket y estacionalidad.</li>
+                <li>Selecciona varios métodos de pago para comparar su peso real en el resultado.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#1e293b';
+
+        // 1. Gráfica Tendencia Mensual (Dinámica)
+        const ctxTendencia = document.getElementById('tendenciaChart').getContext('2d');
+        new Chart(ctxTendencia, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ labels_tendencia|safe }}'),
+                datasets: [{
+                    label: 'Ventas mensuales',
+                    data: JSON.parse('{{ data_tendencia|safe }}'),
+                    borderColor: '#0ea5e9',
+                    backgroundColor: '#0ea5e9',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+        });
+
+        // 2. Gráfica Estacionalidad Promedio (Aún estática)
+        const ctxEstacionalidad = document.getElementById('estacionalidadChart').getContext('2d');
+        new Chart(ctxEstacionalidad, {
+            type: 'bar',
+            data: {
+                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Sept', 'Oct', 'Nov', 'Dic'],
+                datasets: [{
+                    label: 'Promedio por mes',
+                    data: [27000, 27500, 29000, 28500, 28500, 29000, 27000, 28500, 29000, 28000, 28000, 30000],
+                    backgroundColor: '#10b981',
+                    borderRadius: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 3. Gráfica Predicción de Ventas (Aún estática)
+        const ctxPrediccion = document.getElementById('prediccionChart').getContext('2d');
+        new Chart(ctxPrediccion, {
+            type: 'line',
+            data: {
+                labels: ['2024-01', '2024-04', '2024-07', '2024-10', '2025-01', '2025-04', '2025-07', '2025-10', '2026-01', '2026-04', '2026-07', '2026-10', '2027-01', '2027-04'],
+                datasets: [
+                    {
+                        label: 'Histórico',
+                        data: [19500000, 22500000, 16800000, 20100000, 17800000, 22600000, 19000000, 20000000, 23800000, 15300000, 20900000, 23600000, null, null],
+                        borderColor: '#0ea5e9',
+                        backgroundColor: '#0ea5e9',
+                        borderWidth: 2,
+                        tension: 0.2
+                    },
+                    {
+                        label: 'Predicción',
+                        data: [null, null, null, null, null, null, null, null, null, null, null, 23600000, 20400000, 20450000],
+                        borderColor: '#f59e0b', 
+                        backgroundColor: '#f59e0b',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.2
+                    }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    </script>
+</body>
+</html>

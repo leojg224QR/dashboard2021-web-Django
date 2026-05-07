@@ -1,69 +1,142 @@
 <!DOCTYPE html> 
+{% load humanize %}
 <html lang="es"> 
 <head> 
     <meta charset="UTF-8"> 
-    <title>Listado de Ventas</title> 
+    <title>Lista de Ventas - SI Ejecutivo</title> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> 
+        /* Estilos base Dark Mode */
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f4f6f9; 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
             margin: 0; 
-            padding: 20px; 
         } 
- 
+        
+        /* Menú superior */
+        .top-nav { 
+            display: flex; justify-content: flex-end; gap: 10px; 
+            padding: 15px 30px; background-color: #0f172a; align-items: center;
+        }
+        .top-nav a { 
+            color: #cbd5e1; text-decoration: none; font-size: 13px; 
+            padding: 6px 14px; border-radius: 20px; transition: 0.2s; border: 1px solid transparent; 
+        }
+        .top-nav a.active, .top-nav a:hover { border-color: #334155; background-color: #1e293b; color: white; }
+        
+        /* Encabezado */
+        .header-main { 
+            padding: 20px 30px; border-bottom: 1px solid #1e293b; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-main h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .header-main p { margin: 5px 0 0 0; color: #9ca3af; font-size: 14px; }
+        
+        .btn-volver { 
+            background-color: #1e293b; border: 1px solid #334155; color: white; 
+            padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; transition: 0.2s;
+        }
+        .btn-volver:hover { background-color: #334155; }
+
+        /* Contenedor y Tarjeta */
+        .container { padding: 30px; }
         .card { 
-            background: white; 
-            border-radius: 10px; 
-            padding: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-        } 
- 
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        } 
- 
-        th, td { 
-            border: 1px solid #d1d5db; 
-            padding: 10px; 
-        } 
- 
+            background-color: #111827; border: 1px solid #1e293b; 
+            border-radius: 12px; padding: 20px; 
+            overflow-x: auto; /* Para que la tabla no se desborde si hay muchas columnas */
+        }
+
+        /* Estilos de la tabla */
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { 
-            background: #e5e7eb; 
-        } 
- 
-        a { 
-            text-decoration: none; 
-        } 
+            background-color: #1e293b; 
+            color: #f8fafc; 
+            font-weight: bold; 
+            font-size: 13px; 
+            padding: 14px 15px; 
+            text-align: left; 
+        }
+        th:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+        th:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; text-align: right; }
+        
+        td { 
+            padding: 14px 15px; 
+            border-bottom: 1px solid #1e293b; 
+            font-size: 13px; 
+            color: #cbd5e1;
+        }
+        tr:hover td { background-color: #1e293b; color: white; }
+        
+        /* Etiqueta para el Folio */
+        .badge-folio { 
+            background-color: #1e293b; 
+            color: #38bdf8; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-family: monospace;
+            font-weight: bold; 
+            font-size: 13px;
+            border: 1px solid #334155;
+        }
+        
+        .col-total { text-align: right; font-weight: bold; color: #f8fafc !important; }
     </style> 
 </head> 
 <body> 
-    <div class="card"> 
-        <h1>Listado de ventas</h1> 
-        <p><a href="{% url 'inicio' %}">Volver al dashboard</a></p> 
- 
-        <table> 
-            <tr> 
-                <th>Folio</th> 
-                <th>Fecha</th> 
-                <th>Cliente</th> 
-                <th>Sucursal</th> 
-                <th>Vendedor</th> 
-                <th>Método de pago</th> 
-                <th>Total</th> 
-            </tr> 
-            {% for venta in ventas %} 
-            <tr> 
-                <td>{{ venta.folio }}</td> 
-                <td>{{ venta.fecha }}</td> 
-                <td>{{ venta.cliente.nombre }}</td> 
-                <td>{{ venta.sucursal.nombre }}</td> 
-                <td>{{ venta.vendedor.nombre }}</td> 
-                <td>{{ venta.metodo_pago.nombre }}</td> 
-                <td>{{ venta.total }}</td> 
-            </tr> 
-            {% endfor %} 
-        </table> 
-    </div> 
+
+    <!-- Barra de Navegación -->
+    <nav class="top-nav">
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_ventas' %}" class="active">Ventas</a>
+        <a href="{% url 'reporte_mensual' %}">Reporte mensual</a>
+        <a href="{% url 'dashboard_comparativo' %}">Comparativo</a>
+        <a href="#">Analítica</a>
+        <a href="#">Catálogos</a>
+        <a href="#" style="background: #2e1065; color: #fda4af; border-color: #4c1d95;">Cerrar sesión</a>
+    </nav>
+
+    <!-- Encabezado -->
+    <header class="header-main">
+        <div>
+            <h1>Registro de Ventas</h1>
+            <p>Historial transaccional y operaciones comerciales generadas.</p>
+        </div>
+        <a href="{% url 'inicio' %}" class="btn-volver">Volver al inicio</a>
+    </header>
+
+    <!-- Tabla -->
+    <div class="container">
+        <div class="card">
+            <table> 
+                <thead>
+                    <tr> 
+                        <th>Folio</th> 
+                        <th>Fecha</th> 
+                        <th>Cliente</th> 
+                        <th>Sucursal</th> 
+                        <th>Vendedor</th> 
+                        <th>Método</th> 
+                        <th style="text-align: right;">Total</th>
+                    </tr> 
+                </thead>
+                <tbody>
+                    <!-- Asegúrate de que tu vista envía la variable "ventas" -->
+                    {% for venta in ventas %} 
+                    <tr> 
+                        <td><span class="badge-folio">{{ venta.folio }}</span></td> 
+                        <td>{{ venta.fecha|date:"d/m/Y" }}</td> 
+                        <td style="color: #f8fafc;">{{ venta.cliente.nombre }}</td> 
+                        <td>{{ venta.sucursal.nombre }}</td> 
+                        <td>{{ venta.vendedor.nombre }}</td> 
+                        <td>{{ venta.metodo_pago.nombre }}</td> 
+                        <td class="col-total">${{ venta.total|floatformat:2|intcomma }}</td> 
+                    </tr> 
+                    {% endfor %} 
+                </tbody>
+            </table> 
+        </div>
+    </div>
+
 </body> 
 </html>

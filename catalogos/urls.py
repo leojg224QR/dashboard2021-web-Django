@@ -5,7 +5,8 @@ from .views import (
     lista_productos, 
     lista_sucursales, 
     lista_vendedores, 
-    lista_metodos_pago 
+    lista_metodos_pago,
+    mercado_tiempo_real,
 ) 
  
 urlpatterns = [ 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('sucursales/', lista_sucursales, name='lista_sucursales'), 
     path('vendedores/', lista_vendedores, name='lista_vendedores'), 
     path('metodos_pago/', lista_metodos_pago, name='lista_metodos_pago'), 
+    path('mercado/', mercado_tiempo_real, name='mercado_tiempo_real'),
 ]

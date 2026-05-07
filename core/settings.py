@@ -139,3 +139,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+#logins
+LOGIN_REDIRECT_URL = 'inicio' # entrar
+LOGOUT_REDIRECT_URL = 'login' # salir
+
